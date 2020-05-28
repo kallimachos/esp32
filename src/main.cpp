@@ -1,35 +1,40 @@
-/*
-  Blink
-  Turns on an LED on for one second, then off for one second, repeatedly.
-  Most Arduinos have an on-board LED you can control. On the UNO, MEGA and ZERO
-  it is attached to digital pin 13, on MKR1000 on pin 6. LED_BUILTIN is set to
-  the correct LED pin independent of which board is used.
-  If you want t o know what pin the on-board LED is connected to on your Arduino model, check
-  the Technical Specs of your board  at https://www.arduino.cc/en/Main/Products
-
-  To upload, the usb-to-uart-bridge-vcp driver must be installed:
-  https://www.silabs.com/products/development-tools/software/usb-to-uart-bridge-vcp-drivers
-*/
 #include <arduino.h>
+#include <WiFi.h>
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
 
 #define LEDPin 5
 
-// the setup function runs once when you press reset or power the board
-void setup() {
-  // initialize digital pin LED_BUILTIN as an output.
-  pinMode(LEDPin, OUTPUT);
-  Serial.begin(115200);
-  Serial.println("Hello world");
+const char* ssid = "...";
+const char* password =  "...";
+
+AsyncWebServer server(80);
+
+void setup(){
+    Serial.begin(9600);
+    pinMode(LEDPin, OUTPUT);
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(1000);
+        Serial.println("Connecting to WiFi...");
+    }
+    Serial.println(WiFi.localIP());
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+        request->send(200, "text/html", "<p>Hello World!</p>");
+    });
+    server.on("/html", HTTP_GET, [](AsyncWebServerRequest *request){
+        request->send(200, "text/html", "<p>Some HTML!</p>");
+    });
+    server.begin();
 }
 
-// the loop function runs over and over again forever
-void loop() {
-  digitalWrite(LEDPin, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(200);                       // wait for a second
-  digitalWrite(LEDPin, LOW);    // turn the LED off by making the voltage LOW
-  delay(200);                       // wait for a second
-  digitalWrite(LEDPin, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(200);                       // wait for a second
-  digitalWrite(LEDPin, LOW);    // turn the LED off by making the voltage LOW
-  delay(1000);                       // wait for a second
+void loop(){
+    digitalWrite(LEDPin, HIGH);   // turn the LED on (HIGH is the voltage level)
+    delay(200);
+    digitalWrite(LEDPin, LOW);    // turn the LED off by making the voltage LOW
+    delay(200);
+    digitalWrite(LEDPin, HIGH);
+    delay(200);
+    digitalWrite(LEDPin, LOW);
+    delay(1000);
 }
