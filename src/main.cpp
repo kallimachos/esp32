@@ -3,7 +3,7 @@
 #include <WebServer.h>
 #include "DHT.h"
 
-// #define LEDPIN 5
+#define LEDPIN 5
 #define DHTPIN 4
 #define DHTTYPE DHT11
 
@@ -20,7 +20,7 @@ float temperature;
 float humidity;
 float heatIndex;
 
-String SendHTML(float temperatureStat,float humidityStat,float heatIndexStat){
+String SendHTML(float temperatureStat, float humidityStat, float heatIndexStat){
     String ptr = "<!DOCTYPE html> <html>\n";
     ptr +="<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
     ptr +="<link href=\"https://fonts.googleapis.com/css?family=Open+Sans:300,400,600\" rel=\"stylesheet\">\n";
@@ -115,7 +115,7 @@ void handle_OnConnect() {
     Serial.print(F("°C  Heat index: "));
     Serial.print(heatIndex);
     Serial.println(F("°C"));
-    server.send(200, "text/html", SendHTML(temperature,humidity,heatIndex));
+    server.send(200, "text/html", SendHTML(temperature, humidity, heatIndex));
 }
 
 void handle_NotFound(){
@@ -125,6 +125,8 @@ void handle_NotFound(){
 void setup() {
     Serial.begin(9600);
     delay(100);
+    pinMode(LEDPIN, OUTPUT);
+    digitalWrite(LEDPIN, HIGH);  // turn the LED on (HIGH is the voltage level)
     pinMode(DHTPIN, INPUT);
     dht.begin();
     Serial.println("Connecting to ");
@@ -145,13 +147,9 @@ void setup() {
     server.onNotFound(handle_NotFound);
     server.begin();
     Serial.println("HTTP server started");
+    digitalWrite(LEDPIN, LOW);   // turn the LED off by making the voltage LOW
 }
 
 void loop() {
-    // pinMode(LEDPIN, OUTPUT);
-    // digitalWrite(LEDPIN, HIGH);  // turn the LED on (HIGH is the voltage level)
-    // delay(200);
-    // digitalWrite(LEDPIN, LOW);   // turn the LED off by making the voltage LOW
-    // delay(1200);
     server.handleClient();
 }
